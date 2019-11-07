@@ -81,7 +81,7 @@ app.use(function(req, res, next) {
 process.env.NODE_ENV = 'test';
 // console.log(`NODE_ENV: `, process.env.NODE_ENV);
 
-const listener = app.listen(process.env.PORT, function () {
+const listener = app.listen(3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
   if (process.env.NODE_ENV === 'test') {
     console.log('Running Tests...');
