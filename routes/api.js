@@ -15,7 +15,7 @@ var MongoClient = require('mongodb');
 // var ObjectId = require('mongodb').ObjectID;
 
 // needed for node to use .env file
-require('dotenv').config();
+// require('dotenv').config();
 
 // using mongoose instead of MongoClient
 var mongoose = require("mongoose");
@@ -135,8 +135,8 @@ module.exports = function (app) {
       console.log(req.body)
       if (!req.body._id) res.send('_id error');
       Issue.deleteOne({ _id: req.body._id }, function (err, issue) {
-        console.log(issue.deletedCount);
         if (err) return console.error(err);
+        console.log(issue.deletedCount);
         issue.deletedCount === 0
           ? res.send('could not delete ' + _id)
           : res.send('deleted ' + _id);

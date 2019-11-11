@@ -4,7 +4,8 @@
 	"description": "What am I about?",
 	"main": "server.js",
 	"scripts": {
-		"start": "cp .env .envCopy && node server.js"
+		"start": "node server.js",
+		"localStart": "cp .env .envCopy && node -r dotenv/config server.js"
 	},
 	"dependencies": {
 		"body-parser": "^1.19.0",
@@ -31,8 +32,5 @@
 		"hyperdev",
 		"express"
 	],
-	"license": "MIT",
-	"devDependencies": {
-		"dotenv": "^8.2.0"
-	}
+	"license": "MIT"
 }
