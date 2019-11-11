@@ -15,6 +15,7 @@ var apiRoutes         = require('./routes/api.js');
 var fccTestingRoutes  = require('./routes/fcctesting.js');
 var runner            = require('./test-runner');
 
+require('dotenv').config();
 var helmet = require('helmet');
 
 app.use(helmet());
@@ -78,8 +79,8 @@ app.use(function(req, res, next) {
     .send('Not Found');
 });
 
-process.env.NODE_ENV = 'test';
-// console.log(`NODE_ENV: `, process.env.NODE_ENV);
+// process.env.NODE_ENV = 'test';
+console.log(`NODE_ENV: `, process.env.NODE_ENV);
 
 const listener = app.listen(3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
