@@ -71,11 +71,13 @@ var Issue = mongoose.model(
     }
   })
 );
-
-Issue.exists({ project_name: 'Auto Sample Project' }).then(d => {
+Issue.deleteMany({project_name: 'AutoSampleProject' }, function(err, issue){
+  console.log(issue.deletedCount)
+});
+Issue.exists({ project_name: 'AutoSampleProject' }).then(d => {
   if (d === false) {
     new Issue({
-      project_name: 'Auto Sample Project',
+      project_name: 'AutoSampleProject',
       issue_title: 'Sample Issue 1',
       issue_text: 'This issue was auto generated',
       created_by: 'autoIssueGenerator',
@@ -88,6 +90,8 @@ Issue.exists({ project_name: 'Auto Sample Project' }).then(d => {
   } else console.log("Sample DB Created Previously");
 });
 
+Issue.find({project_name: 'AutoSampleProject'}).exec().then(d => console.log(d));
+
 // const CONNECTION_STRING = process.env.DB; //MongoClient.connect(CONNECTION_STRING, function(err, db) {});
 
 module.exports = function (app) {
@@ -96,6 +100,10 @@ module.exports = function (app) {
 
     .get(function (req, res) {
       var project = req.params.project;
+      console.log(project);
+      console.log(req.query)
+      var arr = [];
+      Issue.find({project_name: project}).exec().then(d => res.json(d));
 
 
     })
