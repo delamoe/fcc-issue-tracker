@@ -71,10 +71,10 @@ var Issue = mongoose.model(
     }
   })
 );
-Issue.deleteMany({project_name: 'AutoSampleProject' }, function(err, issue){
+/* Issue.deleteMany({ project_name: 'AutoSampleProject' }, function (err, issue) {
   console.log(issue.deletedCount)
-});
-Issue.exists({ project_name: 'AutoSampleProject' }).then(d => {
+}); */
+/* Issue.exists({ project_name: 'AutoSampleProject' }).then(d => {
   if (d === false) {
     new Issue({
       project_name: 'AutoSampleProject',
@@ -90,27 +90,38 @@ Issue.exists({ project_name: 'AutoSampleProject' }).then(d => {
   } else console.log("Sample DB Created Previously");
 });
 
-Issue.find({project_name: 'AutoSampleProject'}).exec().then(d => console.log(d));
+Issue.find({ project_name: 'AutoSampleProject' }).exec().then(d => console.log(d)); */
 
 // const CONNECTION_STRING = process.env.DB; //MongoClient.connect(CONNECTION_STRING, function(err, db) {});
 
 module.exports = function (app) {
 
   app.route('/api/issues/:project')
-
-    .get(function (req, res) {
+  .get(function (req, res) {
+    // console.log(project);
+    // console.log(req.query);
       var project = req.params.project;
-      console.log(project);
-      console.log(req.query)
-      var arr = [];
-      Issue.find({project_name: project}).exec().then(d => res.json(d));
-
-
+      Issue.find({ project_name: project }).find(req.query).exec().then(d => res.json(d));
     })
 
     .post(function (req, res) {
-      var project = req.params.project;
-
+      // console.log(project);
+      // console.log(req.body);
+      /* if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) res.send("Please complete all required.");
+      else { */
+        new Issue({
+          project_name: req.params.project.replace('%20', ' '),
+          issue_title: req.body.issue_title,
+          issue_text: req.body.issue_text,
+          created_by: req.body.created_by,
+          assigned_to: req.body.assigned_to,
+          status_text: req.body.status_text
+        }).save(function (err, issue) {
+          if (err) return console.error(err);
+          // console.log(`${issue.project_name}, ${issue.issue_title} Created & Saved`);
+          res.json(issue);
+        })
+      /* } */
     })
 
     .put(function (req, res) {

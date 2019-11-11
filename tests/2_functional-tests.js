@@ -19,8 +19,9 @@ suite('Functional Tests', function() {
       
       test('Every field filled in', function(done) {
        chai.request(server)
-        .post('/api/issues/test')
+        .post('/api/issues/testProject')
         .send({
+          project_name: 'testProject',
           issue_title: 'Title',
           issue_text: 'text',
           created_by: 'Functional Test - Every field filled in',
