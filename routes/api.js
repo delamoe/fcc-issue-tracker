@@ -97,9 +97,11 @@ Issue.find({ project_name: 'AutoSampleProject' }).exec().then(d => console.log(d
 module.exports = function (app) {
 
   app.route('/api/issues/:project')
-  .get(function (req, res) {
-    // console.log(project);
-    // console.log(req.query);
+
+    // this .get will not filter dates properly
+    .get(function (req, res) {
+      // console.log(project);
+      // console.log(req.query);
       var project = req.params.project;
       Issue.find({ project_name: project }).find(req.query).exec().then(d => res.json(d));
     })
@@ -109,18 +111,18 @@ module.exports = function (app) {
       // console.log(req.body);
       /* if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) res.send("Please complete all required.");
       else { */
-        new Issue({
-          project_name: req.params.project.replace('%20', ' '),
-          issue_title: req.body.issue_title,
-          issue_text: req.body.issue_text,
-          created_by: req.body.created_by,
-          assigned_to: req.body.assigned_to,
-          status_text: req.body.status_text
-        }).save(function (err, issue) {
-          if (err) return console.error(err);
-          // console.log(`${issue.project_name}, ${issue.issue_title} Created & Saved`);
-          res.json(issue);
-        })
+      new Issue({
+        project_name: req.params.project.replace('%20', ' '),
+        issue_title: req.body.issue_title,
+        issue_text: req.body.issue_text,
+        created_by: req.body.created_by,
+        assigned_to: req.body.assigned_to,
+        status_text: req.body.status_text
+      }).save(function (err, issue) {
+        if (err) return console.error(err);
+        // console.log(`${issue.project_name}, ${issue.issue_title} Created & Saved`);
+        res.json(issue);
+      })
       /* } */
     })
 
@@ -130,8 +132,15 @@ module.exports = function (app) {
     })
 
     .delete(function (req, res) {
-      var project = req.params.project;
-
+      console.log(req.body)
+      if (!req.body._id) res.send('_id error');
+      Issue.deleteOne({ _id: req.body._id }, function (err, issue) {
+        console.log(issue.deletedCount);
+        if (err) return console.error(err);
+        issue.deletedCount === 0
+          ? res.send('could not delete ' + _id)
+          : res.send('deleted ' + _id);
+      });
     });
 
 };
