@@ -15,3 +15,7 @@
 SECRET=La5_n9l
 
 # note: .env is a shell file so there can't be spaces around =
+
+NODE_ENV=test
+
+MONGO_URI="mongodb+srv://eddy:QmrsY9DF1Wvs4E8u@ed-apram.mongodb.net/test?retryWrites=true&w=majority"
