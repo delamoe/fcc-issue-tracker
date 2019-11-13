@@ -18,7 +18,8 @@ var runner            = require('./test-runner');
 // require('dotenv').config();
 var helmet = require('helmet');
 
-app.use(helmet());
+app.use(helmet.noSniff());
+app.use(helmet.xssFilter());
 
 app.use(cors({origin: '*'})); //For FCC testing purposes only
 

@@ -37,7 +37,7 @@
             crossorigin="anonymous"></script>
     <script>
       $(function() {
-        var currentProject = window.location.pathname.replace(/\//g, "").replace('%20', ' ');
+        var currentProject = window.location.pathname.replace(/\//g, "");
         var url = "/api/issues/"+currentProject;
         $('#projectTitle').text('All issues for: '+currentProject)
         $.ajax({
@@ -47,7 +47,6 @@
           {
             var issues= [];
             data.forEach(function(ele) {
-              console.log(ele);
               var openstatus;
               (ele.open) ? openstatus = 'open' : openstatus = 'closed';
               var single = [
@@ -97,7 +96,8 @@
             type: "DELETE",
             url: url,
             data: {_id: $(this).attr('id')},
-            success: function(data) { alert(data); window.location.reload(true); }
+            success: function(data) { 
+              alert(data); window.location.reload(true); }
           });
           e.preventDefault();
         });

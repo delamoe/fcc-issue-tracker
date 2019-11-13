@@ -112,7 +112,7 @@ module.exports = function (app) {
       /* if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) res.send("Please complete all required.");
       else { */
       new Issue({
-        project_name: req.params.project.replace('%20', ' '),
+        project_name: req.params.project,
         issue_title: req.body.issue_title,
         issue_text: req.body.issue_text,
         created_by: req.body.created_by,
@@ -128,6 +128,14 @@ module.exports = function (app) {
 
     .put(function (req, res) {
       var project = req.params.project;
+      var query = req.query;
+      console.log(`query: ${query}`)
+      
+      Issue.findOneAndUpdate({ _id: req.body._id }, { $set: {open: false}, updated_on: new Date().getTime()}, function(err, issue){
+        if (err) console.error(err);
+        res.send('successfully updated');
+      })
+      //'This should always update updated_on. return successfully updated' or 'could not update '+_id or if no fields are sent return 'no updated field sent'.
 
     })
 
@@ -138,8 +146,8 @@ module.exports = function (app) {
         if (err) return console.error(err);
         console.log(issue.deletedCount);
         issue.deletedCount === 0
-          ? res.send('could not delete ' + _id)
-          : res.send('deleted ' + _id);
+          ? res.send('could not delete ' + req.body._id)
+          : res.send('deleted ' + req.body._id);
       });
     });
 
