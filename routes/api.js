@@ -102,7 +102,7 @@ module.exports = function (app) {
     .get(function (req, res) {
       // console.log(project);
       // console.log(req.query);
-      var project = req.params.project;
+      var project = req.params.project.replace('%20', ' ');
       Issue.find({ project_name: project }).find(req.query).exec().then(d => res.json(d));
     })
 
@@ -112,12 +112,12 @@ module.exports = function (app) {
       /* if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) res.send("Please complete all required.");
       else { */
       new Issue({
-        project_name: req.params.project,
+        project_name: req.params.project.replace('%20', ' '),
         issue_title: req.body.issue_title,
         issue_text: req.body.issue_text,
         created_by: req.body.created_by,
-        assigned_to: req.body.assigned_to,
-        status_text: req.body.status_text
+        assigned_to: req.body.assigned_to || '',
+        status_text: req.body.status_text || ''
       }).save(function (err, issue) {
         if (err) return console.error(err);
         // console.log(`${issue.project_name}, ${issue.issue_title} Created & Saved`);
@@ -131,7 +131,7 @@ module.exports = function (app) {
       var query = req.query;
       console.log(`query: ${query}`)
       
-      Issue.findOneAndUpdate({ _id: req.body._id }, { $set: {open: false}, updated_on: new Date().getTime()}, function(err, issue){
+      Issue.updateOne({ _id: req.body._id }, { $set: {open: false}, updated_on: new Date().getTime()}, function(err, issue){
         if (err) console.error(err);
         res.send('successfully updated');
       })
