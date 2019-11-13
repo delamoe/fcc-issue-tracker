@@ -25,6 +25,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 });
 
+
 // specify the shape of the data to be stored
 var Issue = mongoose.model(
   "Issue",
@@ -71,8 +72,19 @@ var Issue = mongoose.model(
     }
   })
 );
+
+var Project = mongoose.model(
+  "Project",
+  mongoose.Schema({
+    project_name: {
+      type: String,
+      required: true
+    },
+    issues: { type: [], Issue: [Issue] }
+  })
+);
 /* Issue.deleteMany({ project_name: 'AutoSampleProject' }, function (err, issue) {
-  console.log(issue.deletedCount)
+console.log(issue.deletedCount)
 }); */
 /* Issue.exists({ project_name: 'AutoSampleProject' }).then(d => {
   if (d === false) {
@@ -100,34 +112,71 @@ module.exports = function (app) {
 
     // this .get will not filter dates properly
     .get(function (req, res) {
-      // console.log(project);
+      var project_name = req.params.project.replace(/%20/g, ' ');
+      // console.log(project_name);
       console.log(`query: `, req.query);
-      var project = req.params.project.replace('%20', ' ');
-      Issue.find({ project_name: project }).find(req.query).exec().then(d => res.json(d));
+      // var issues = [];
+      var project = Project.findOne({ project_name: project_name }).exec().then(project => {
+        // console.log(`project: `, project);
+        if (project === null) return res.json([]);
+        // filter for queries here
+        // console.log(`query.open: `, typeof req.query.open);
+        var issues = project.issues
+          .filter(issue =>
+            req.query.open === `${issue.open}` || req.query.open === undefined)
+          .filter(issue =>
+            req.query.issue_title === issue.issue_title || req.query.issue_title === undefined)
+          .filter(issue =>
+            req.query.issue_text === issue.issue_text || req.query.issue_text === undefined)
+          .filter(issue =>
+            req.query.created_by === issue.created_by || req.query.created_by === undefined)
+          .filter(issue =>
+            req.query.assigned_to === issue.assigned_to || req.query.assigned_to === undefined)
+          .filter(issue =>
+            req.query.status_text === issue.status_text || req.query.status_text === undefined);
+        res.json(issues);
+      });
     })
 
     .post(function (req, res) {
-      // console.log(project);
-      // console.log(req.body);
+      var project_name = req.params.project.replace(/%20/g, ' ');
+      console.log(`project_name: ${project_name}`);
+      console.log(`req.body: `, req.body);
       /* if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) res.send("Please complete all required.");
       else { */
-      new Issue({
-        project_name: req.params.project.replace('%20', ' '),
+      // create a new issue  
+      var issue = new Issue({
+        // project_name: project_name,
         issue_title: req.body.issue_title,
         issue_text: req.body.issue_text,
         created_by: req.body.created_by,
         assigned_to: req.body.assigned_to || '',
         status_text: req.body.status_text || ''
-      }).save(function (err, issue) {
-        if (err) return console.error(err);
-        // console.log(`${issue.project_name}, ${issue.issue_title} Created & Saved`);
-        res.json(issue);
-      })
+      });
+      console.log("Issue Created");
+      // if no project, create project, else just push issue
+      var project = Project.updateOne(
+        { project_name: project_name },
+        { $push: { issues: issue } },
+        { upsert: true, new: true, setDefaultsOnInsert: true },
+        function (err, data) {
+          if (err) return console.error(err);
+          // console.log(`${data.project_name}, ${data.issues[0].issue_title} Created & Saved`);
+        }
+      );
+      console.log("Project Created");
+      // project.issues.push(issue);
+      // project.update()
+
+      res.json(issue);
+
+
+      // new Project({ project_name: project });
       /* } */
     })
 
     .put(function (req, res) {
-      var project = req.params.project;
+      var project_name = req.params.project.replace(/%20/g, ' ');
       var query = req.query;
       console.log(`query: `, query)
 
@@ -140,6 +189,7 @@ module.exports = function (app) {
     })
 
     .delete(function (req, res) {
+      var project_name = req.params.project.replace(/%20/g, ' ');
       console.log(req.body)
       if (!req.body._id) res.send('_id error');
       Issue.deleteOne({ _id: req.body._id }, function (err, issue) {
