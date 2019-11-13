@@ -114,7 +114,7 @@ module.exports = function (app) {
     .get(function (req, res) {
       var project_name = req.params.project.replace(/%20/g, ' ');
       // console.log(project_name);
-      console.log(`query: `, req.query);
+      // console.log(`query: `, req.query);
       // var issues = [];
       var project = Project.findOne({ project_name: project_name }).exec().then(project => {
         // console.log(`project: `, project);
@@ -140,11 +140,8 @@ module.exports = function (app) {
 
     .post(function (req, res) {
       var project_name = req.params.project.replace(/%20/g, ' ');
-      console.log(`project_name: ${project_name}`);
-      console.log(`req.body: `, req.body);
-      /* if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) res.send("Please complete all required.");
-      else { */
-      // create a new issue  
+      // console.log(`project_name: ${project_name}`);
+      // console.log(`req.body: `, req.body);
       var issue = new Issue({
         // project_name: project_name,
         issue_title: req.body.issue_title,
@@ -153,52 +150,79 @@ module.exports = function (app) {
         assigned_to: req.body.assigned_to || '',
         status_text: req.body.status_text || ''
       });
-      console.log("Issue Created");
-      // if no project, create project, else just push issue
-      var project = Project.updateOne(
+      Project.updateOne(
         { project_name: project_name },
         { $push: { issues: issue } },
         { upsert: true, new: true, setDefaultsOnInsert: true },
         function (err, data) {
           if (err) return console.error(err);
-          // console.log(`${data.project_name}, ${data.issues[0].issue_title} Created & Saved`);
-        }
-      );
-      console.log("Project Created");
-      // project.issues.push(issue);
-      // project.update()
-
-      res.json(issue);
-
-
-      // new Project({ project_name: project });
-      /* } */
+          res.json(issue);
+        })
     })
 
     .put(function (req, res) {
       var project_name = req.params.project.replace(/%20/g, ' ');
-      var query = req.query;
-      console.log(`query: `, query)
+      // console.log(`query: `, typeof req.query, req.query);
+      // console.log(`body: `, req.body);
+      if (!req.body._id && Object.keys(req.query).length === 0)
+        return res.send('no updated field sent');
+      Project.findOne(
+        {
+          project_name: project_name,
+          "issues._id": req.body._id
+        }, function (err, project) {
+          if (err) return console.error(err);
+          var issue = project.issues.filter(issue => issue._id === req.body._id);
+          var issue_title, issue_text, created_by, assigned_to, status_text;
+          issue_title = req.query.issue_title === undefined ? issue[0].issue_title : req.query.issue_title;
+          issue_text = req.query.issue_text === undefined ? issue[0].issue_text : req.query.issue_text;
+          created_by = req.query.created_by === undefined ? issue[0].created_by : req.query.created_by;
+          assigned_to = req.query.assigned_to === undefined ? issue[0].assigned_to : req.query.assigned_to;
+          status_text = req.query.status_text === undefined ? issue[0].status_text : req.query.status_text;
+          Project.updateOne(
+            {
+              project_name: project_name,
+              "issues._id": req.body._id
+            },
+            {
+              $set:
+              {
+                "issues.$.open": req.body.open === 'false' ? false : true,
+                "issues.$.updated_on": new Date().getTime(),
+                "issues.$.issue_title": issue_title,
+                "issues.$.issue_text": issue_text,
+                "issues.$.created_by": created_by,
+                "issues.$.assigned_to": assigned_to,
+                "issues.$.status_text": status_text
+              }
+            },
+            function (err, issue) {
+              if (err) {
+                console.error(err);
 
-      Issue.updateOne({ _id: req.body._id }, { $set: { open: false }, updated_on: new Date().getTime() }, function (err, issue) {
-        if (err) console.error(err);
-        res.send('successfully updated');
-      })
-      //'This should always update updated_on. return successfully updated' or 'could not update '+_id or if no fields are sent return 'no updated field sent'.
-
+                res.send('could not update');
+              }
+              console.log(`issue: `, issue);
+              res.send('successfully updated');
+            })
+        });
     })
 
     .delete(function (req, res) {
       var project_name = req.params.project.replace(/%20/g, ' ');
-      console.log(req.body)
-      if (!req.body._id) res.send('_id error');
-      Issue.deleteOne({ _id: req.body._id }, function (err, issue) {
-        if (err) return console.error(err);
-        console.log(issue.deletedCount);
-        issue.deletedCount === 0
-          ? res.send('could not delete ' + req.body._id)
-          : res.send('deleted ' + req.body._id);
-      });
+      // console.log(req.body);
+      if (!req.body._id) return res.send('_id error');
+      Project.updateOne(
+        { project_name: project_name },
+        { $pull: { issues: { _id: req.body._id } } },
+        function (err, issue) {
+          if (err) {
+            console.error(err);
+            res.send('could not delete ' + req.body._id);
+          }
+          // console.log(`issue: `, issue);
+          res.send('deleted ' + req.body._id);
+        });
     });
 
 };
