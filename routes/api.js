@@ -101,7 +101,7 @@ module.exports = function (app) {
     // this .get will not filter dates properly
     .get(function (req, res) {
       // console.log(project);
-      // console.log(req.query);
+      console.log(`query: `, req.query);
       var project = req.params.project.replace('%20', ' ');
       Issue.find({ project_name: project }).find(req.query).exec().then(d => res.json(d));
     })
@@ -129,9 +129,9 @@ module.exports = function (app) {
     .put(function (req, res) {
       var project = req.params.project;
       var query = req.query;
-      console.log(`query: ${query}`)
-      
-      Issue.updateOne({ _id: req.body._id }, { $set: {open: false}, updated_on: new Date().getTime()}, function(err, issue){
+      console.log(`query: `, query)
+
+      Issue.updateOne({ _id: req.body._id }, { $set: { open: false }, updated_on: new Date().getTime() }, function (err, issue) {
         if (err) console.error(err);
         res.send('successfully updated');
       })
