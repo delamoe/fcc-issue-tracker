@@ -34,10 +34,6 @@ var Issue = mongoose.model(
       type: String,
       default: shortid.generate
     },
-    project_name: {
-      type: String,
-      required: true
-    },
     issue_title: {
       type: String,
       required: true
@@ -83,29 +79,6 @@ var Project = mongoose.model(
     issues: { type: [], Issue: [Issue] }
   })
 );
-/* Issue.deleteMany({ project_name: 'AutoSampleProject' }, function (err, issue) {
-console.log(issue.deletedCount)
-}); */
-/* Issue.exists({ project_name: 'AutoSampleProject' }).then(d => {
-  if (d === false) {
-    new Issue({
-      project_name: 'AutoSampleProject',
-      issue_title: 'Sample Issue 1',
-      issue_text: 'This issue was auto generated',
-      created_by: 'autoIssueGenerator',
-      assigned_to: 'this field is not required',
-      status_text: 'nor is this one'
-    }).save(function (err, issue) {
-      if (err) return console.error(err);
-      console.log("Sample DB Created Just Now");
-    })
-  } else console.log("Sample DB Created Previously");
-});
-
-Issue.find({ project_name: 'AutoSampleProject' }).exec().then(d => console.log(d)); */
-
-// const CONNECTION_STRING = process.env.DB; //MongoClient.connect(CONNECTION_STRING, function(err, db) {});
-
 module.exports = function (app) {
 
   app.route('/api/issues/:project')
@@ -142,6 +115,7 @@ module.exports = function (app) {
       var project_name = req.params.project.replace(/%20/g, ' ');
       // console.log(`project_name: ${project_name}`);
       // console.log(`req.body: `, req.body);
+      console.log(req.body.issue_title);
       var issue = new Issue({
         // project_name: project_name,
         issue_title: req.body.issue_title,
@@ -202,7 +176,7 @@ module.exports = function (app) {
 
                 res.send('could not update');
               }
-              console.log(`issue: `, issue);
+              // console.log(`issue: `, issue);
               res.send('successfully updated');
             })
         });
