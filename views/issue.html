@@ -58,7 +58,7 @@
                 '<p>'+ele.status_text+'</p>',
                 '<br>',
                 '<p class="id"><b>Created by:</b> '+ele.created_by+'  <b>Assigned to:</b> '+ele.assigned_to,
-                '<p class="id"><b>Created on:</b> '+ele.created_on+'  <b>Last updated:</b> '+ele.updated_on,
+                '<p class="id"><b>Created on:</b> '+ new Date(ele.created_on)+'  <b>Last updated:</b> '+ new Date(ele.updated_on),
                 '<br><a href="#" class="closeIssue" id="'+ele._id+'">close?</a> <a href="#" class="deleteIssue" id="'+ele._id+'">delete?</a>',
                 '</div>'
                 

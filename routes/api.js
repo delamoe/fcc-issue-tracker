@@ -115,7 +115,6 @@ module.exports = function (app) {
       var project_name = req.params.project.replace(/%20/g, ' ');
       // console.log(`project_name: ${project_name}`);
       // console.log(`req.body: `, req.body);
-      console.log(req.body.issue_title);
       var issue = new Issue({
         // project_name: project_name,
         issue_title: req.body.issue_title,
