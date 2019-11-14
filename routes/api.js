@@ -107,6 +107,9 @@ module.exports = function (app) {
             req.query.assigned_to === issue.assigned_to || req.query.assigned_to === undefined)
           .filter(issue =>
             req.query.status_text === issue.status_text || req.query.status_text === undefined);
+            //********************************************
+            // TODO:
+            //      filter by dates
         res.json(issues);
       });
     })
