@@ -15,7 +15,6 @@ var apiRoutes         = require('./routes/api.js');
 var fccTestingRoutes  = require('./routes/fcctesting.js');
 var runner            = require('./test-runner');
 
-// require('dotenv').config();
 var helmet = require('helmet');
 
 app.use(helmet.noSniff());

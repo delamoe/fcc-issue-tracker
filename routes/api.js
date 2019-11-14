@@ -79,7 +79,12 @@ var Project = mongoose.model(
     issues: { type: [], Issue: [Issue] }
   })
 );
+
+// Ensure test data is not too big
+Project.deleteMany({ project_name: 'Functional Tests' }).exec();
+
 module.exports = function (app) {
+
 
   app.route('/api/issues/:project')
 
@@ -107,9 +112,9 @@ module.exports = function (app) {
             req.query.assigned_to === issue.assigned_to || req.query.assigned_to === undefined)
           .filter(issue =>
             req.query.status_text === issue.status_text || req.query.status_text === undefined);
-            //********************************************
-            // TODO:
-            //      filter by dates
+        //********************************************
+        // TODO:
+        //      filter by dates
         res.json(issues);
       });
     })
@@ -118,8 +123,9 @@ module.exports = function (app) {
       var project_name = req.params.project.replace(/%20/g, ' ');
       // console.log(`project_name: ${project_name}`);
       // console.log(`req.body: `, req.body);
+      if (!req.body.issue_title || !req.body.issue_text || !req.body.created_by) return res.send('Please go back and fill in all required fields');
       var issue = new Issue({
-        // project_name: project_name,
+        _id: req.body._id,
         issue_title: req.body.issue_title,
         issue_text: req.body.issue_text,
         created_by: req.body.created_by,
@@ -128,7 +134,7 @@ module.exports = function (app) {
       });
       Project.updateOne(
         { project_name: project_name },
-        { $push: { issues: issue } },
+        { $push: { issues: { $each: [issue], $position: 0 } } },
         { upsert: true, new: true, setDefaultsOnInsert: true },
         function (err, data) {
           if (err) return console.error(err);
@@ -199,6 +205,18 @@ module.exports = function (app) {
           // console.log(`issue: `, issue);
           res.send('deleted ' + req.body._id);
         });
+    });
+
+  app.route('/api/issues/deleteProject/:project')
+    .get(function (req, res) {
+      var project_name = req.params.project.replace(/%20/g, ' ');
+      console.log(project_name);
+
+      Project.deleteOne({ project_name: project_name }, function (err, project) {
+        if (err) return console.error(err);
+        console.log(project);
+        res.send(`${project_name} successfully deleted.`);
+      });
     });
 
 };
